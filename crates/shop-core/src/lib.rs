@@ -9,5 +9,5 @@ pub mod product;
 pub mod seller;
 
 pub use cart::{Cart, CartItem};
-pub use product::{Category, Condition, Product};
+pub use product::{Category, Condition, Product, VehicleDetails};
 pub use seller::{Seller, SellerKind};

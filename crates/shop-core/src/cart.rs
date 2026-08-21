@@ -74,6 +74,8 @@ mod tests {
             stock_quantity: 10,
             condition: Condition::New,
             image_urls: vec![],
+            vehicle_details: None,
+            used_condition_note: None,
         }
     }
 
