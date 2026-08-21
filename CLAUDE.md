@@ -48,6 +48,68 @@ open-shop/
 
 ## HANDOFF
 
+- **2026-08-21(続き) 第2フェーズ(高額・中古品出品フロー)実装完了**:
+  - `shop-core`: `Category`に`Car`/`Motorcycle`/`Airplane`を追加
+    (`is_high_value_vehicle()`ヘルパー付き)。`VehicleDetails`型を
+    新設(`model`/`year`/`mileage_km`/`flight_hours`/
+    `registration_number`/`has_maintenance_record`/
+    `has_accident_history`、全フィールド`Option`)。`Product`に
+    `vehicle_details: Option<VehicleDetails>`と
+    `used_condition_note: Option<String>`を追加。いずれも`#[serde(default)]`
+    かつ`Option`のため、既存カテゴリ(家具等)・既存テストとの後方互換
+    を壊していない。
+  - `shop-api`: `POST /v1/products`に2つのバリデーション関数を追加。
+    - `validate_vehicle_details`: `car`/`motorcycle`/`airplane`は
+      `vehicle_details`必須。年式(`year`)・登録番号/機体記号
+      (`registration_number`)は共通必須、自動車/バイクは
+      `mileage_km`、航空機は`flight_hours`がそれぞれ追加で必須
+      (航空機に「走行距離」の概念が無いため項目を分けた)。欠けている
+      フィールド名を含む400エラーを返す。
+    - `validate_used_condition`: `condition: "used"`の商品は
+      `used_condition_note`必須(カテゴリを問わない共通ルール、
+      `"new"`では不要でエラーにもしない)。
+    - `GET /v1/products/search`に`year_min`/`year_max`/`mileage_max`を
+      追加(`parse_u16_param`/`parse_u32_param`ヘルパー新設)。
+      `filter_products`にこれら3条件を追加(`vehicle_details`を持たない
+      商品はこれらの条件が指定されている場合マッチしないようにし、
+      家具等に年式・走行距離という無関係な概念を誤って適用しないよう
+      にした)。
+  - **テスト**: `shop-core`は既存5件のまま(`cart.rs`のテスト用
+    `sample_product`ヘルパーに新フィールドの`None`初期化を追加した
+    のみ)。`shop-api`に第2フェーズ用テストを9件追加
+    (`vehicle_details`欠如時の400・自動車の`mileage_km`欠如時の
+    フィールド名付き400・航空機は`mileage_km`ではなく`flight_hours`
+    必須・自動車の完全な出品成功・中古品で`used_condition_note`欠如時の
+    400・新品では不要なことの確認・年式範囲/走行距離上限フィルタの
+    絞り込み・不正な`year_min`での400)。既存の
+    `create_product_with_unknown_category_returns_400_with_valid_list`
+    テストは`airplane`が第2フェーズで実在カテゴリになったため、
+    無効カテゴリの例を`spaceship`に差し替えた。既存の
+    `search_filters_by_keyword_category_price_and_condition`テストは
+    `condition: "used"`の商品作成時に`used_condition_note`が必須に
+    なったため、テストヘルパー`register_product`を
+    `condition == "used"`の場合に自動でメモを付与するよう修正した。
+    合計`shop-core` 5件+`shop-api` 24件、全29件成功
+    (`cargo test --release`)。
+  - **検証結果**: `cargo build --release`成功。実サーバーを起動し、
+    PowerShellの`Invoke-RestMethod`で(1)`vehicle_details`無しの
+    自動車出品が400(フィールド名`vehicle_details`)、(2)年式・走行距離・
+    登録番号を含む中古車の出品成功、(3)`year_min=2015&mileage_max=50000`
+    での検索が該当1件のみを返す、(4)`used_condition_note`無しの中古
+    家具出品が400、(5)新品家具の出品・検索は従来通り成功、を
+    それぞれ実HTTPリクエストで確認した。
+  - **スコープ外(意図的に未実装、正直な開示)**: 年式・走行距離・
+    登録番号等は自己申告データの保持のみで、車検証・登録証・機体記号
+    の公的機関照合や整備記録・事故歴の裏取りは一切行っていない。
+    注文確定・決済処理(Stripe連携含む)、保険代理店API連携、国際発送・
+    貿易・宅配便API連携、認証・認可、実DB永続化には引き続き一切
+    手を付けていない。
+  - 次にすべきこと: 第3フェーズ(保険代理店API連携)に着手する場合、
+    高額車両(自動車・バイク・航空機)の出品時点で保険加入状況・
+    代理店紹介をどう組み込むか検討が必要。また、決済処理
+    (第2フェーズのHANDOFFで触れた注文確定フロー)は依然未着手のため、
+    フェーズ3着手前にユーザーとスコープを再確認すること。
+
 - **2026-08-21 新規作成・第1フェーズ実装完了**:
   - `shop-core`: `Seller`(`SellerKind::Individual`/`Business`で個人/法人
     出店者を区別)、`Product`(`Category`は家具の7区分の簡易列挙、
