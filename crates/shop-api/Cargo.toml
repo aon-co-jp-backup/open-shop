@@ -1,0 +1,23 @@
+[package]
+name = "shop-api"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "open-shop: 出品・商品検索・カートのHTTP API(tokio/hyper直接実装、フレームワーク非依存)。"
+
+[[bin]]
+name = "shop-api"
+path = "src/main.rs"
+
+[dependencies]
+shop-core = { path = "../shop-core" }
+tokio = { version = "1", features = ["full"] }
+hyper = { version = "1", features = ["full"] }
+hyper-util = { version = "0.1", features = ["full"] }
+http-body-util = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]

@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/shop-core",
+    "crates/shop-api",
+]
+
+[workspace.package]
+version    = "0.1.0"
+edition    = "2021"
+authors    = ["aon-co-jp"]
+license    = "MIT"
+repository = "https://github.com/aon-co-jp/open-shop"
