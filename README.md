@@ -1,3 +1,5 @@
+> Latest translations / 翻訳の最新版: [0-LATEST-TRANSLATIONS.md](0-LATEST-TRANSLATIONS.md)
+
 # open-shop
 
 一般個人から貿易商社まで出品・出店可能な総合通販システム(構想段階)。
