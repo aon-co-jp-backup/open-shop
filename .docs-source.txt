@@ -1,3 +1,3 @@
 source: aon-co-jp/open-shop
-commit: aff19598a49ab3b1e230a4b7e05343980515a217
-updated: 2026-11-27T06:04:55Z
+commit: 74ffb0bf61cbf89627d8c0bbe4ad043b4915145a
+updated: 2026-11-27T06:07:48Z
